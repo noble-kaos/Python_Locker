@@ -1,0 +1,56 @@
+#sub_domain_enumeration
+
+import os, requests, sys
+
+file = f"{sys.argv[1]}"
+path=os.getcwd() + file
+
+sub_list = open(file).read()
+subdoms = sub_list.splitlines()
+
+for sub in subdoms:
+	sub_domains = f"http://{sub}.{sys.argv[2]}"
+
+try:
+		requests.get(sub_domains)
+
+except requests.ConnectionError:
+	pass
+else:
+		print("Valid domain: ",sub_domains)
+
+
+
+#directory_enumeration
+
+import os, requests, sys
+
+file = f"{sys.argv[1]}"
+path=os.getcwd() + file
+
+sub_list = open(file).read()
+directories = sub_list.splitlines()
+
+for dir in directories:
+	dir_enum = f"http://{sys.argv[2]}/{dir}.html"
+	r = requests.get(dir_enum)
+	if r.status_code==404:
+		pass
+	else:
+		print("Valid Directory:" ,dir_enum)
+		
+
+#host_scan
+
+from scapy.all import *
+
+interface = f"{sys.argv[1]}"
+ip_range  = f"{sys.argv[2]}"
+bcast_mac = "ff:ff:ff:ff:ff:ff"
+
+packet    = Ether(dst=bcast_mac)/ARP(pdst = ip_range)
+
+ans, unans= srp(packet, timeout =2, iface=interface, inter=0.1)
+
+for send, receive in ans:
+	print (receive.sprintf(r"%Ether.src% - %ARP.psrc%"))
